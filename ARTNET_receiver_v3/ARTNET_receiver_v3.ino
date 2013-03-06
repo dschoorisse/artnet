@@ -89,12 +89,9 @@ void loop() {
   //if(packetSize>art_net_header_size && packetSize<=max_packet_size)//check size to avoid unneeded checks
   if(packetSize) {
     Serial.print("Packet received! (size: ");
-    Serial.print(packetSize);
-    Serial.print(") \n");
-    Serial.print(art_net_header_size);
-    Serial.print("\n");
-    Serial.print(max_packet_size);
-    Serial.print("\n");
+    Serial.print(packetSize + ")\n");
+    Serial.print(art_net_header_size + "\n");
+    Serial.print(max_packet_size + "\n");
     
     IPAddress remote = Udp.remoteIP();    
     remotePort = Udp.remotePort();
@@ -149,10 +146,9 @@ void loop() {
      }//end of sniffing
      
      for(int k=0; k<15; k++) {
-       Serial.print(buffer_dmx[k]);
-       Serial.print(", ");  
+       Serial.print(buffer_dmx[k] + ", ");
      }
-     Serial.println("");     
+     Serial.print("\n");     
   }  
 }
 

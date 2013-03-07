@@ -72,9 +72,9 @@ EthernetUDP Udp;
 
 void setup() {
   //setup pins as PWM output
-  //pinMode(3, OUTPUT);  //check with leds + resistance in pwm, this will not work with pins 10 and 11, used by RJ45 shield
-  //pinMode(5, OUTPUT);  //check with leds + resistance in pwm, this will not work with pins 10 and 11, used by RJ45 shield
-  //pinMode(6, OUTPUT);  //check with leds + resistance in pwm, this will not work with pins 10 and 11, used by RJ45 shield 
+  pinMode(3, OUTPUT);  //check with leds + resistance in pwm, this will not work with pins 10 and 11, used by RJ45 shield
+  pinMode(5, OUTPUT);  //check with leds + resistance in pwm, this will not work with pins 10 and 11, used by RJ45 shield
+  pinMode(6, OUTPUT);  //check with leds + resistance in pwm, this will not work with pins 10 and 11, used by RJ45 shield 
   
   //setup ethernet and udp socket
   Ethernet.begin(mac,ip);
@@ -89,9 +89,12 @@ void loop() {
   //if(packetSize>art_net_header_size && packetSize<=max_packet_size)//check size to avoid unneeded checks
   if(packetSize) {
     Serial.print("Packet received! (size: ");
-    Serial.print(packetSize + ")\n");
-    Serial.print(art_net_header_size + "\n");
-    Serial.print(max_packet_size + "\n");
+    Serial.print(packetSize);
+    Serial.print(") \n");
+    Serial.print(art_net_header_size);
+    Serial.print("\n");
+    Serial.print(max_packet_size);
+    Serial.print("\n");
     
     IPAddress remote = Udp.remoteIP();    
     remotePort = Udp.remotePort();
@@ -104,10 +107,10 @@ void loop() {
       if(char(packetBuffer[i])!=ArtNetHead[i]) {
         match_artnet=0;break;
       } 
-     } 
-     
+    } 
+       
      //if its an artnet header
-     if (match_artnet==1) { 
+    if(match_artnet==1) { 
         //artnet protocole revision, not really needed
         //is_artnet_version_1=packetBuffer[10]; 
         //is_artnet_version_2=packetBuffer[11];*/
@@ -118,37 +121,43 @@ void loop() {
         //physical port of  dmx N°
         //artnet_physical=packetBuffer[13];*/
         
-     //operator code enables to know wich type of message Art-Net it is
-     Opcode=bytes_to_short(packetBuffer[9],packetBuffer[8]);
-     
-     //if opcode is DMX type
-     if(Opcode==0x5000) {
-       is_opcode_is_dmx=1;is_opcode_is_artpoll=0;
-     }   
-     
-     //if opcode is artpoll 
-     else if(Opcode==0x2000) {
-       is_opcode_is_artpoll=1;is_opcode_is_dmx=0;
-       //( we should normally reply to it, giving ip adress of the device)
-     } 
-     
-     //if its DMX data we will read it now
-     if(is_opcode_is_dmx=1) {
-       //if you need to filter DMX universes, uncomment next line to have the universe rceived
-       //incoming_universe= bytes_to_short(packetBuffer[15],packetBuffer[14])
-     
-        //getting data from a channel position, on a precise amount of channels, this to avoid to much operation if you need only 4 channels for example
-        //channel position
-        for(int i=channel_position-1;i< number_of_channels;i++) {
-          buffer_dmx[i]= byte(packetBuffer[i+17]);
-        }
+      //operator code enables to know wich type of message Art-Net it is
+      Opcode=bytes_to_short(packetBuffer[9],packetBuffer[8]);
+       
+      //if opcode is DMX type
+      if(Opcode==0x5000) {
+        is_opcode_is_dmx=1;is_opcode_is_artpoll=0;
+      }   
+       
+      //if opcode is artpoll 
+      else if(Opcode==0x2000) {
+         is_opcode_is_artpoll=1;is_opcode_is_dmx=0;
+         //( we should normally reply to it, giving ip adress of the device)
+      } 
+       
+      //if its DMX data we will read it now
+      if(is_opcode_is_dmx=1) {
+         //if you need to filter DMX universes, uncomment next line to have the universe rceived
+         //incoming_universe= bytes_to_short(packetBuffer[15],packetBuffer[14])
+       
+          //getting data from a channel position, on a precise amount of channels, this to avoid to much operation if you need only 4 channels for example
+          //channel position
+          for(int i=channel_position-1;i< number_of_channels;i++) {
+            buffer_dmx[i]= byte(packetBuffer[i+17]);
+          }
       }
-     }//end of sniffing
+    }//end of sniffing
      
-     for(int k=0; k<15; k++) {
-       Serial.print(buffer_dmx[k] + ", ");
-     }
-     Serial.print("\n");     
+    for(int k=6; k<9; k++) {
+       Serial.print(buffer_dmx[k]);
+       Serial.print(", ");  
+    }
+    Serial.println("");
+
+    //stuff to do on PWM or whatever
+    analogWrite(3,buffer_dmx[6]);  
+    analogWrite(5,buffer_dmx[7]); 
+    analogWrite(6,buffer_dmx[8]);      
   }  
 }
 
